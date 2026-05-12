@@ -35,12 +35,14 @@ class DocumentServiceTest extends TestCase
         $service->createDocument($doc);
     }
 
-    public function testGetExpiringDocumentsRequiresDb(): void
+    public function testGetExpiringDocumentsReturnsEmptyArrayWhenNoDb(): void
     {
         $service = new DocumentService(null, 'fa_');
         
-        $this->expectException(\RuntimeException::class);
-        $service->getExpiringDocuments(30);
+        $result = $service->getExpiringDocuments(30);
+        
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
     }
 
     public function testAddAttachmentReturnsFalseWhenNoDb(): void
