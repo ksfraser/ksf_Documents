@@ -196,5 +196,76 @@ ksf_Documents/
 
 ---
 
-*Document Version: 1.0.0*
-*Last Updated: 2026-05-11*
+## 8. RBAC Integration (ksfraser/rbac)
+
+### 8.1 Module Registration
+
+ksf_Documents registers with ksfraser/rbac:
+- record_types: 'document', 'folder', 'document_version', 'tag'
+- projections: 'public', 'full'
+- allow_invite: false
+- children: document_version (child of document)
+- inheritance_map: document → [document_version]
+
+### 8.2 Entity DTO Projections
+
+| Entity | PUBLIC Fields | FULL Fields |
+|--------|---------------|-------------|
+| Document | id, name, type, status, version, expiry_date, created_at, employee_id | + file_path, mime_type, signature_data, signed_at, acknowledged, acknowledged_at, internal_notes, audit_trail |
+| Folder | id, name, parent_id, created_at | + description, owner_id, access_control_list |
+| DocumentVersion | version_number, created_at, created_by | + file_path, file_hash, file_size, mime_type |
+
+### 8.3 Access Model
+
+- **Employee**: PUBLIC to own documents (view, sign, acknowledge)
+- **Manager**: PUBLIC to direct reports' documents (training certs, performance reviews only)
+- **HR Manager**: FULL to documents for assigned department employees
+- **HR Admin**: FULL to all documents, can edit/delete
+- **System Admin**: FULL to all documents, hard delete, folder management
+
+### 8.4 SQL Enforcement
+
+All document and folder queries MUST JOIN against 0_rbac_record_access:
+
+```sql
+JOIN 0_rbac_record_access ra
+  ON ra.record_id    = d.id
+ AND ra.record_type  = 'document'
+ AND ra.module       = 'documents'
+ AND ra.inactive     = 0
+ AND ra.can_view     = 1
+JOIN 0_rbac_team_members tm
+  ON tm.team_id  = ra.team_id
+ AND tm.user_id  = :currentUserId
+ AND tm.inactive = 0
+```
+
+### 8.5 Access Inheritance
+
+When a team is granted access to a document:
+- Access cascades to document_versions (inherit parent caps)
+- Folder access does NOT automatically cascade to contained documents — folder-based document visibility is resolved by a separate query-level rule
+
+### 8.6 Soft Delete & Audit Logging
+
+- Documents use soft delete: `deleted = 1`, `deleted_by`, `deleted_at`
+- Hard delete is super-admin only (requires `can_hard_delete = 1` in role type-level permissions)
+- Deleted document records have visibility gated by `can_view_deleted` type-level permission
+- The following operations are written to `0_rbac_audit_log`:
+  - document.uploaded
+  - document.signed
+  - document.acknowledged
+  - document.deleted (soft)
+  - document.restored
+  - document.permanently_deleted
+  - document.access_granted
+  - document.access_revoked
+
+### 8.7 Persons Registry Integration
+
+Documents are linked to employees via employee_id. RBAC team resolution for the "Employee's own documents" rule leverages the Persons Registry to resolve the current user's employee identity, enabling automatic PUBLIC projection grants when a user accesses their own records. HR Manager and Manager role assignments use department hierarchy resolved through the Persons Registry org chart.
+
+---
+
+*Document Version: 1.1.0*
+*Last Updated: 2026-05-24*
