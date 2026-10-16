@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ksfraser\Documents\Entity;
+namespace ksfraser\Documents\Entity;
 
 class Document
 {

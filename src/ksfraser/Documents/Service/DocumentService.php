@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Ksfraser\Documents\Service;
+namespace ksfraser\Documents\Service;
 
-use Ksfraser\Documents\Entity\Document;
+use ksfraser\Documents\Entity\Document;
 
 class DocumentService implements DocumentServiceInterface
 {

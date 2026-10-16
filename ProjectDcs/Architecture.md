@@ -15,7 +15,7 @@ ksf_Documents provides document management for employee records including contra
 
 ### 1.1 Namespace
 ```php
-Ksfraser\Documents\
+ksfraser\Documents\
 ```
 
 ### 1.2 Layer Pattern
@@ -184,7 +184,7 @@ ksf_Documents/
 │   ├── Test Plan.md
 │   ├── UAT Plan.md
 │   └── RTM.md
-└── src/Ksfraser/Documents/
+└── src/ksfraser/Documents/
     ├── Entity/
     │   └── Document.php
     ├── Service/

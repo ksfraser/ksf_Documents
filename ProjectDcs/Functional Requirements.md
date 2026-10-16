@@ -107,6 +107,48 @@ ksf_Documents provides document management for employee records including contra
 - Search by name
 - Get expiring documents
 
+### FR-DOC-007: RBAC Integration
+**Requirement**: All document and folder queries MUST be filtered through RBAC.
+
+**Features**:
+- JOIN against 0_rbac_record_access for all document-fetching queries
+- JOIN against 0_rbac_team_members for current user resolution
+- Support PUBLIC and FULL projections per entity
+- Enforce team-based access at query level
+
+### FR-DOC-008: DTO Projections
+**Requirement**: Document entity shall define PUBLIC and FULL data projections.
+
+**Features**:
+- PUBLIC: id, name, type, status, version, expiry_date, created_at, employee_id
+- FULL: all fields including file_path, mime_type, signature_data, signed_at, internal_notes, audit_trail
+- Folder: PUBLIC (id, name, parent_id) vs FULL (description, owner_id, access_control_list)
+- DocumentVersion: PUBLIC (version_number, created_by) vs FULL (file_path, file_hash, file_size)
+
+### FR-DOC-009: Soft Delete
+**Requirement**: Documents shall support soft delete.
+
+**Features**:
+- `deleted = 1` flag, `deleted_by`, `deleted_at` fields
+- Hard delete restricted to super-admin
+- Deleted records gated by `can_view_deleted` type-level permission
+
+### FR-DOC-010: Access Inheritance
+**Requirement**: Document access shall cascade to child entities.
+
+**Features**:
+- Team access to document inherits to document_versions
+- Soft-deleted document restricts all child version visibility
+- Folder-level access resolved separately via query-level rule
+
+### FR-DOC-011: Audit Logging
+**Requirement**: All document access and lifecycle events shall be audited.
+
+**Features**:
+- Log document uploads, signatures, acknowledgments, deletions, restorations
+- Log RBAC grant/revoke operations
+- Append-only audit trail with no application-level UPDATE/DELETE
+
 ---
 
 ## 4. Document Types

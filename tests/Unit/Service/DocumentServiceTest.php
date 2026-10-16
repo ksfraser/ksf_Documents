@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ksfraser\Documents\Tests\Unit\Service;
+namespace ksfraser\Documents\Tests\Unit\Service;
 
 use PHPUnit\Framework\TestCase;
-use Ksfraser\Documents\Service\DocumentService;
-use Ksfraser\Documents\Entity\Document;
+use ksfraser\Documents\Service\DocumentService;
+use ksfraser\Documents\Entity\Document;
 
 class DocumentServiceTest extends TestCase
 {
